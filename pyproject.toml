@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kubeflow-llm-trainer"
+version = "0.1.0"
+description = "Pluggable multi-framework LLM fine-tuning backend for Kubeflow Trainer (TRL, Unsloth, LlamaFactory, TorchTune)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "GSoC 2026 PoC" }]
+dependencies = [
+    "pydantic>=2,<3",
+    "PyYAML>=6,<7",
+]
+
+[project.optional-dependencies]
+# Heavy ML extras — kept OUT of the core install on purpose.
+trl = ["trl", "peft", "transformers", "torch", "accelerate", "datasets"]
+unsloth = ["unsloth", "trl", "peft", "transformers", "torch", "datasets"]
+llamafactory = ["llamafactory"]
+torchtune = ["torchtune", "torch"]
+dev = ["pytest>=8,<9"]
+
+[project.scripts]
+klt = "kubeflow_llm_trainer.cli:main"
+
+# Real plugin packaging: external backends advertise themselves here.
+# The bundled backends are registered in-process, but this group is what
+# third-party plugin packages would use.
+[project.entry-points."kubeflow_llm_trainer.backends"]
+trl = "kubeflow_llm_trainer.backends.trl:TRLBackend"
+unsloth = "kubeflow_llm_trainer.backends.unsloth:UnslothBackend"
+llamafactory = "kubeflow_llm_trainer.backends.llamafactory:LlamaFactoryBackend"
+torchtune = "kubeflow_llm_trainer.backends.torchtune:TorchTuneBackend"
+
+[tool.setuptools.packages.find]
+include = ["kubeflow_llm_trainer*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

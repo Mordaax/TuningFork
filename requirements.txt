@@ -1,0 +1,21 @@
+# Core dependencies — required to import the framework, validate configs,
+# build dry-run plans, run the `klt` CLI, and run the test suite.
+# Deliberately tiny: NO ML libraries here.
+pydantic>=2,<3
+PyYAML>=6,<7
+
+# ---------------------------------------------------------------------------
+# OPTIONAL extras (NOT installed by this file). Each backend's REAL execution
+# path needs its own heavy dependency. Install only the one you intend to run:
+#
+#   TRL          : pip install trl peft transformers torch accelerate datasets
+#   Unsloth      : pip install unsloth trl peft transformers torch datasets
+#   LlamaFactory : pip install llamafactory
+#   TorchTune    : pip install torchtune torch
+#
+# These are intentionally left out so the framework imports and the test suite
+# pass with ZERO ML libraries present.
+# ---------------------------------------------------------------------------
+
+# Dev / test only:
+pytest>=8,<9

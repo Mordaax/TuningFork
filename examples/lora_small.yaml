@@ -1,0 +1,39 @@
+# Tiny LoRA fine-tune config — intended to be small enough to smoke-test.
+#
+# This uses a small base model and the (small) yelp_review_full dataset so a
+# real run is feasible on a single modest GPU. To run for real on a GPU:
+#
+#   pip install 'kubeflow-llm-trainer[trl]'        # or [unsloth]/[llamafactory]/[torchtune]
+#   klt plan  --backend trl examples/lora_small.yaml          # inspect the plan
+#   klt train --backend trl examples/lora_small.yaml          # run it (omit --dry-run)
+#
+# On CPU-only machines, keep --dry-run; this PoC defers real GPU runs.
+
+model_name_or_path: HuggingFaceTB/SmolLM2-135M-Instruct
+output_dir: ./outputs/smollm2-lora
+precision: bf16
+
+dataset:
+  name_or_path: yelp_review_full
+  split: train
+  text_field: text
+  max_samples: 256
+
+lora:
+  enabled: true
+  r: 8
+  alpha: 16
+  dropout: 0.05
+  target_modules:
+    - q_proj
+    - v_proj
+
+hyperparams:
+  learning_rate: 0.0002
+  num_epochs: 1
+  per_device_batch_size: 2
+  gradient_accumulation_steps: 4
+  max_seq_len: 512
+  warmup_ratio: 0.03
+  weight_decay: 0.0
+  seed: 42
