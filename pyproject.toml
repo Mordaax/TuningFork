@@ -3,13 +3,13 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "kubeflow-llm-trainer"
+name = "tuningfork"
 version = "0.1.0"
-description = "Pluggable multi-framework LLM fine-tuning backend for Kubeflow Trainer (TRL, Unsloth, LlamaFactory, TorchTune)."
+description = "Unified LLM fine-tuning configuration and backend-specific dry-run plans."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "GSoC 2026 PoC" }]
+authors = [{ name = "Cyrus Tan" }]
 dependencies = [
     "pydantic>=2,<3",
     "PyYAML>=6,<7",
@@ -25,6 +25,7 @@ dev = ["pytest>=8,<9"]
 
 [project.scripts]
 klt = "kubeflow_llm_trainer.cli:main"
+tuningfork = "kubeflow_llm_trainer.cli:main"
 
 # Real plugin packaging: external backends advertise themselves here.
 # The bundled backends are registered in-process, but this group is what

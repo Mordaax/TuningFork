@@ -87,7 +87,7 @@ class LlamaFactoryBackend(TrainerBackend):
             notes=[
                 f"Dry-run would write '{config_name}' then run: "
                 f"llamafactory-cli train {config_name}",
-                "Install with: pip install 'kubeflow-llm-trainer[llamafactory]'",
+                "Install with: pip install 'tuningfork[llamafactory]'",
             ],
         )
 

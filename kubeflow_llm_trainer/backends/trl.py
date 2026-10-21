@@ -90,6 +90,6 @@ class TRLBackend(TrainerBackend):
             notes=[
                 "Equivalent Python API: trl.SFTTrainer(model=..., args=SFTConfig(...), "
                 "peft_config=peft.LoraConfig(...))",
-                "Install with: pip install 'kubeflow-llm-trainer[trl]'",
+                "Install with: pip install 'tuningfork[trl]'",
             ],
         )

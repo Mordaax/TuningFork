@@ -83,6 +83,6 @@ class TorchTuneBackend(TrainerBackend):
             notes=[
                 "model_name_or_path informs checkpoint config; TorchTune selects "
                 "weights via its recipe/config (override with extra.tune_config).",
-                "Install with: pip install 'kubeflow-llm-trainer[torchtune]'",
+                "Install with: pip install 'tuningfork[torchtune]'",
             ],
         )

@@ -3,7 +3,7 @@
 # This uses a small base model and the (small) yelp_review_full dataset so a
 # real run is feasible on a single modest GPU. To run for real on a GPU:
 #
-#   pip install 'kubeflow-llm-trainer[trl]'        # or [unsloth]/[llamafactory]/[torchtune]
+#   pip install 'tuningfork[trl]'        # or [unsloth]/[llamafactory]/[torchtune]
 #   klt plan  --backend trl examples/lora_small.yaml          # inspect the plan
 #   klt train --backend trl examples/lora_small.yaml          # run it (omit --dry-run)
 #

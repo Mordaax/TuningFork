@@ -140,6 +140,6 @@ class UnslothBackend(TrainerBackend):
             },
             notes=[
                 f"Dry-run would write '{script_name}' then run: python {script_name}",
-                "Install with: pip install 'kubeflow-llm-trainer[unsloth]'",
+                "Install with: pip install 'tuningfork[unsloth]'",
             ],
         )

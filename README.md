@@ -1,28 +1,16 @@
-# Kubeflow LLM Trainer — Pluggable Multi-Framework Backend
+# TuningFork
 
-A proof-of-concept that gives **Kubeflow Trainer** a *pluggable* training-backend
-system so a single, unified fine-tuning config can be executed by **any** of
-several LLM fine-tuning tools — **TRL**, **Unsloth**, **LlamaFactory**, and
-**TorchTune** — behind one interface.
+TuningFork takes one LLM fine-tuning configuration and prepares backend-specific plans for TRL, Unsloth, LlamaFactory and TorchTune. It validates the model, dataset and training settings, then shows the command each backend would use. It can also generate a Kubeflow TrainJob manifest.
 
-> GSoC 2026 portfolio PoC. Real GPU runs and model downloads are intentionally
-> **deferred** (documented below). Everything here imports, validates, plans,
-> and tests with **zero ML libraries installed**.
+This is a standalone proof of concept, not an integration into Kubeflow Trainer. The included demonstrations are dry runs; GPU training and model downloads have not been verified here.
 
 ---
 
 ## Problem
 
-Kubeflow Trainer's training logic is effectively tied to one backend. As the
-LLM fine-tuning ecosystem fragmented (TRL/SFTTrainer, Unsloth's fused kernels,
-LlamaFactory's CLI, Meta's TorchTune recipes), users want to pick the tool that
-best fits their model/hardware **without** rewriting their job spec each time.
+TRL, Unsloth, LlamaFactory and TorchTune take different settings and commands. Switching between them can mean rewriting the same fine-tuning job. TuningFork keeps the common model, dataset and training settings in one YAML file and translates them into a plan for the selected backend.
 
-This project introduces a **backend abstraction**: describe the job once in a
-unified schema, then route it to whichever backend you want. Each backend
-*adapter* knows how to translate the unified config into that tool's native
-invocation (CLI args or Python API). A `--dry-run` mode prints the **exact
-command/plan** that would execute — no GPU, no downloads, no ML deps required.
+Each backend adapter validates the shared configuration and prepares its native command or API call. Dry runs print the plan without downloading models or requiring a GPU.
 
 ## Architecture (at a glance)
 
@@ -57,15 +45,15 @@ command/plan** that would execute — no GPU, no downloads, no ML deps required.
 - **`backends/*.py`** — one adapter per tool.
 - **`cli.py`** — the `klt` command.
 
-See **[ARCHITECTURE.md](ARCHITECTURE.md)** for the deep dive.
+See **[ARCHITECTURE.md](ARCHITECTURE.md)** for implementation details. The existing `klt` command remains available for the CLI and generated manifests.
 
-## How it plugs into Kubeflow Trainer
+## Possible use with Kubeflow Trainer
 
 Kubeflow Trainer (v2) exposes a **`TrainJob` CRD** plus **`TrainingRuntime` /
 `ClusterTrainingRuntime`** templates, and a Python SDK (`TrainerClient`). A
 runtime ultimately launches a container that runs *some* training entrypoint.
 
-This framework slots in at exactly that entrypoint:
+A possible integration would use TuningFork as that container entrypoint:
 
 1. A user submits a unified `TrainingConfig` (e.g. as a ConfigMap / job arg).
 2. The Trainer runtime's container runs `klt train --backend <X> config.yaml`.
@@ -152,11 +140,11 @@ Command :
     model.lora_dropout=0.05 model.lora_attn_modules=[q_proj,v_proj]
 ```
 
-## Example: tiny LoRA fine-tune
+## Example: planning a small LoRA fine-tune
 
 [`examples/lora_small.yaml`](examples/lora_small.yaml) describes a LoRA SFT of
 `SmolLM2-135M-Instruct` on a 256-sample slice of `yelp_review_full` — small
-enough for a single modest GPU. To run it **for real** on a GPU:
+enough to plan without a GPU. The commands below show how a GPU run would be started; a complete training run has not been verified for this project:
 
 ```bash
 pip install -e '.[trl]'                                   # GPU box with CUDA torch
@@ -164,28 +152,18 @@ klt plan  --backend trl examples/lora_small.yaml          # inspect the plan fir
 klt train --backend trl examples/lora_small.yaml          # omit --dry-run to execute
 ```
 
-On CPU-only / this PoC, keep `--dry-run`.
+For the verified demonstration, use `plan` or `train --dry-run`.
 
 ## Tests
 
 ```bash
-PYTHONPATH=. python -m pytest -q     # 57 tests, all green with NO ML libs
+PYTHONPATH=. python -m pytest -q
 ```
 
 The suite covers: registry register/resolve/list, config validation (valid +
 invalid), each backend's dry-run command/args, dependency-guard errors, and a
 CLI smoke test via subprocess. A test explicitly asserts that no ML library is
 importable, enforcing the "core is ML-free" invariant.
-
-## GSoC angle
-
-This is a focused slice of a real Kubeflow Trainer need: **decouple the trainer
-from any single fine-tuning library.** The PoC demonstrates the hard parts —
-a stable unified schema, a clean adapter contract, a registry with both
-in-process and entry-point plugin discovery, and dry-run planning that the
-control plane can use for validation — while leaving GPU execution as a
-well-scoped follow-up. It is intentionally dependency-light so it can live in
-CI and be reasoned about without a GPU.
 
 ## Deferred (documented, not implemented)
 
@@ -197,7 +175,7 @@ CI and be reasoned about without a GPU.
 ## File tree
 
 ```
-04-kubeflow-llm-trainer/
+TuningFork/
 ├── README.md
 ├── ARCHITECTURE.md
 ├── pyproject.toml
